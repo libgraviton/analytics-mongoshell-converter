@@ -2,17 +2,18 @@
 <?php
 
 if (strpos(__DIR__, 'vendor') === false) {
-    require __DIR__ . '/../vendor/autoload.php';
+    require __DIR__ . '/vendor/autoload.php';
+    $scanDir = __DIR__.'/../';
 } else {
-    // assume vendor to be on include_path if installed
-    require 'vendor/autoload.php';
+    require __DIR__ . '/../../../autoload.php';
+    $scanDir = __DIR__.'/../../../../';
 }
 
 $fs = new Symfony\Component\Filesystem\Filesystem();
 $finder = new \Symfony\Component\Finder\Finder();
 $finder
     ->files()
-    ->in(__DIR__.'/../')
+    ->in($scanDir)
     ->path('/\/analytics\//i')
     ->name('*.json')
     ->notName('_*')
