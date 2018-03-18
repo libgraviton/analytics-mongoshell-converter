@@ -1,0 +1,55 @@
+#!/usr/bin/env php
+<?php
+
+if (strpos(__DIR__, 'vendor') === false) {
+    require __DIR__ . '/../vendor/autoload.php';
+} else {
+    // assume vendor to be on include_path if installed
+    require 'vendor/autoload.php';
+}
+
+$fs = new Symfony\Component\Filesystem\Filesystem();
+$finder = new \Symfony\Component\Finder\Finder();
+$finder
+    ->files()
+    ->in(__DIR__.'/../')
+    ->path('/\/analytics\//i')
+    ->name('*.json')
+    ->notName('_*')
+    ->sortByName();
+
+foreach ($finder as $file) {
+    // is there [name].js in the folder?
+    $fullPath = $file->getPathname();
+    // with .js ending
+    $jsFilePath = substr($fullPath, 0, -4).'js';
+
+    if ($fs->exists($jsFilePath)) {
+        $json = parseFile($jsFilePath);
+
+        $pipelinePath = substr($fullPath, 0, -4).'pipeline.json';
+        $fs->dumpFile($pipelinePath, json_encode($json, JSON_PRETTY_PRINT));
+
+        echo "wrote ".$pipelinePath.PHP_EOL;
+    }
+}
+
+function parseFile($jsFilePath)
+{
+    $content = file_get_contents($jsFilePath);
+
+    // fixed "new Date" instances
+    $content = preg_replace('/new Date\(\)/i', '"#newDate#"', $content);
+
+    // params are marked by comments like:
+    /* param:theName */ $i = 2; /* endparam */
+    $content = preg_replace('@\/\* param\:([a-z0-9]*) \*\/(.*)\/\* endparam \*\/@i', '"\${$1}"', $content);
+
+    // remove other comments
+    $content = preg_replace('@\/\*(.*)\*\/@im', '', $content);
+
+    $jsonParser = new \Seld\JsonLint\JsonParser();
+    $structure = $jsonParser->parse($content);
+
+    return $structure;
+}
