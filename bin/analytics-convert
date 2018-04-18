@@ -15,24 +15,25 @@ $finder
     ->files()
     ->in($scanDir)
     ->path('/\/analytics\//i')
-    ->name('*.json')
+    ->name('*.js')
     ->notName('_*')
     ->sortByName();
 
 foreach ($finder as $file) {
-    // is there [name].js in the folder?
     $fullPath = $file->getPathname();
-    // with .js ending
-    $jsFilePath = substr($fullPath, 0, -4).'js';
+    $json = parseFile($fullPath);
 
-    if ($fs->exists($jsFilePath)) {
-        $json = parseFile($jsFilePath);
-
-        $pipelinePath = substr($fullPath, 0, -4).'pipeline.json';
-        $fs->dumpFile($pipelinePath, json_encode($json, JSON_PRETTY_PRINT));
-
-        echo "wrote ".$pipelinePath.PHP_EOL;
+    // multipipe file?
+    if (substr_count($file->getFilename(), '.') > 1) {
+        $targetFileName = substr($file->getFilename(), 0, strpos($file->getFilename(), '.'));
+        $subName = substr($file->getFilename(), strpos($file->getFilename(), '.'), -3);
+        $targetFileName = $file->getPath().'/'.$targetFileName.'.pipeline'.$subName.'.json';
+    } else {
+        $targetFileName = substr($fullPath, 0, -2).'pipeline.json';
     }
+
+    $fs->dumpFile($targetFileName, json_encode($json, JSON_PRETTY_PRINT));
+    echo "wrote ".$targetFileName.PHP_EOL;
 }
 
 function parseFile($jsFilePath)
