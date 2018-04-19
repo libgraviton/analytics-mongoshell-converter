@@ -50,6 +50,18 @@ function parseFile($jsFilePath)
     // remove other comments
     $content = preg_replace('@\/\*(.*)\*\/@im', '', $content);
 
+    // date instances with data
+    preg_match_all('/new Date\((.*)\)/i', $content,$matches, PREG_SET_ORDER);
+    if (!empty($matches)) {
+        foreach ($matches as $match) {
+            $toReplace = $match[0];
+            $replaceWith = '"#mongoDate('.str_replace('"', '', $match[1]).')#"';
+            $content = str_replace($toReplace, $replaceWith, $content);
+        }
+    }
+
+    $content = preg_replace('/new Date\((.*)\)/i', '"#newDate#"', $content);
+
     $jsonParser = new \Seld\JsonLint\JsonParser();
     $structure = $jsonParser->parse($content);
 
