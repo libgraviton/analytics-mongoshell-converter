@@ -58,10 +58,23 @@ class Parser
                     $thisLine .= ' /* PARAM END */ ';
 
                     break;
+                case Lexer::T_DATE_EMPTY:
+                    $thisLine = 'new \MongoDate()';
+                    break;
+                case Lexer::T_DATE_WITH_PARAM:
+                    $theParam = $this->lexer->lookahead['value'];
+                    $thisLine = 'new \MongoDate()';
+                    break;
                 case Lexer::T_COMMENT_NOUSE:
                     // skip
                     $this->lexer->moveNext();
                     // IGNORE THIS
+                    break;
+                case Lexer::T_BOOLEAN_TRUE:
+                    $thisLine = 'true';
+                    break;
+                case Lexer::T_BOOLEAN_FALSE:
+                    $thisLine = 'false';
                     break;
                 default:
                     $thisLine = $this->lexer->token['value'];
