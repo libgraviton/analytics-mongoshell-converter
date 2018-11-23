@@ -1,11 +1,19 @@
 <?php
+/**
+ * Lexer to parse the *.js file
+ */
 namespace AnalyticsConverter;
 
 use Doctrine\Common\Lexer\AbstractLexer;
 
+/**
+ * @author   List of contributors <https://github.com/libgraviton/graviton/graphs/contributors>
+ * @license  https://opensource.org/licenses/MIT MIT License
+ * @link     http://swisscom.ch
+ */
 class Lexer extends AbstractLexer {
 
-    public const T_NONE              = 1;
+    public const T_NONE = 1;
 
     public const T_COMMA = 2;
     public const T_DOUBLEQUOTE = 3;
@@ -16,6 +24,7 @@ class Lexer extends AbstractLexer {
     public const T_STRING = 8;
     public const T_BOOLEAN_FALSE = 9;
     public const T_BOOLEAN_TRUE = 10;
+	public const T_DASH = 11;
 
     public const T_OPEN_CURLY_BRACE  = 18;
     public const T_CLOSE_CURLY_BRACE = 19;
@@ -25,14 +34,17 @@ class Lexer extends AbstractLexer {
     public const T_COMMENT_PARAMSTART = 100;
     public const T_COMMENT_PARAMEND = 101;
     public const T_COMMENT_NOUSE = 102;
+	public const T_COMMENT_IFPARAMSTART = 110;
+	public const T_COMMENT_IFPARAMEND = 111;
 
-    public const T_DATE_EMPTY = 110;
-    public const T_DATE_WITH_PARAM = 111;
+    public const T_DATE_EMPTY = 150;
+    public const T_DATE_WITH_PARAM = 151;
 
     private $commentRegexes = [
-        //'\\/\* param\:([a-z0-9]*) \*\\/' => self::T_COMMENT_PARAMSTART,
         '\\/\* param\:([a-z0-9]*) \*\\/' => self::T_COMMENT_PARAMSTART,
         '\\/\* endparam \*\\/' => self::T_COMMENT_PARAMEND,
+		'\\/\* ifparam\:([a-z0-9]*) \*\\/' => self::T_COMMENT_IFPARAMSTART,
+		'\\/\* endifparam \*\\/' => self::T_COMMENT_IFPARAMEND,
         '\\/\*(.*)\*\\/' => self::T_COMMENT_NOUSE,
         'new Date\(\)' => self::T_DATE_EMPTY,
         'new Date\((.*)\)' => self::T_DATE_WITH_PARAM
@@ -108,12 +120,12 @@ class Lexer extends AbstractLexer {
                 return self::T_DOUBLEQUOTE;
             case ($value === ':'):
                 return self::T_DOUBLEPOINT;
+			case ($value === '-'):
+				return self::T_DASH;
             case ($value === 'true'):
                 return self::T_BOOLEAN_TRUE;
             case ($value === 'false'):
                 return self::T_BOOLEAN_FALSE;
-
-            // Default
             default:
                 foreach ($this->commentRegexes as $regex => $regexType) {
                     if (preg_match('/'.$regex.'/i', $value)) {
@@ -124,5 +136,4 @@ class Lexer extends AbstractLexer {
 
         return $type;
     }
-
 }
