@@ -1,80 +1,11 @@
 #!/usr/bin/env php
 <?php
-require __DIR__ . '/../vendor/autoload.php';
+require __DIR__.'/../vendor/autoload.php';
 
-/*
-if (strpos(__DIR__, 'vendor') === false) {
-    require __DIR__ . '/vendor/autoload.php';
-    $scanDir = __DIR__.'/../';
-} else {
-    require __DIR__ . '/../../../autoload.php';
-    $scanDir = __DIR__.'/../../../../';
-}
-*/
+use Symfony\Component\Console\Application;
 
-$scanDir = '/home/dn/git/loadconfig-bundles/graviton-service-bundle-evoja-basics/';
-
-$fs = new Symfony\Component\Filesystem\Filesystem();
-$finder = new \Symfony\Component\Finder\Finder();
-$finder
-    ->files()
-    ->in($scanDir)
-    ->path('/\/analytics\//i')
-    ->name('*.js')
-    ->notName('_*')
-    ->sortByName();
-
-foreach ($finder as $file) {
-    $fullPath = $file->getPathname();
-    $json = parseFile($fullPath);
-
-    $parser = new \AnalyticsConverter\Parser($file->getContents());
-    $lexerParsed = $parser->parse();
-
-    // multipipe file?
-    if (substr_count($file->getFilename(), '.') > 1) {
-        $targetFileName = substr($file->getFilename(), 0, strpos($file->getFilename(), '.'));
-        $subName = substr($file->getFilename(), strpos($file->getFilename(), '.'), -3);
-        $targetFileName = $file->getPath().'/'.$targetFileName.'.pipeline'.$subName.'.json';
-    } else {
-        $targetFileName = substr($fullPath, 0, -2).'pipeline.json';
-    }
-
-    $lexerParsed = '<?php'.PHP_EOL.'$a = '.$lexerParsed.';';
-
-    $fs->dumpFile($targetFileName, json_encode($json, JSON_PRETTY_PRINT));
-    $fs->dumpFile($targetFileName.'.php', $lexerParsed);
-    echo "wrote ".$targetFileName.PHP_EOL;
-}
-
-function parseFile($jsFilePath)
-{
-    $content = file_get_contents($jsFilePath);
-
-    // fixed "new Date" instances
-    $content = preg_replace('/new Date\(\)/i', '"#newDate#"', $content);
-
-    // params are marked by comments like:
-    /* param:theName */ $i = 2; /* endparam */
-    $content = preg_replace('@\/\* param\:([a-z0-9]*) \*\/(.*)\/\* endparam \*\/@i', '"\${$1}"', $content);
-
-    // remove other comments
-    $content = preg_replace('@\/\*(.*)\*\/@im', '', $content);
-
-    // date instances with data
-    preg_match_all('/new Date\((.*)\)/i', $content,$matches, PREG_SET_ORDER);
-    if (!empty($matches)) {
-        foreach ($matches as $match) {
-            $toReplace = $match[0];
-            $replaceWith = '"#mongoDate('.str_replace('"', '', $match[1]).')#"';
-            $content = str_replace($toReplace, $replaceWith, $content);
-        }
-    }
-
-    $content = preg_replace('/new Date\((.*)\)/i', '"#newDate#"', $content);
-
-    $jsonParser = new \Seld\JsonLint\JsonParser();
-    $structure = $jsonParser->parse($content);
-
-    return $structure;
-}
+$application = new Application('converter');
+$command = new \AnalyticsConverter\Command\ConvertCommand();
+$application->add($command);
+$application->setDefaultCommand($command->getName(), true);
+$application->run();
