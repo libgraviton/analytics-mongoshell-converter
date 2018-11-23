@@ -1,6 +1,6 @@
 {
     "name": "graviton/analytics-mongoshell-converter",
-    "description": "small script that converts a mongoshell compatible aggregate array to json",
+    "description": "small script that converts a mongoshell compatible aggregate array to php classes",
     "type": "cli",
     "license": "MIT",
     "authors": [
@@ -13,9 +13,11 @@
         "php": ">=7.2",
         "symfony/finder": "^4.0",
         "symfony/filesystem": "^4.0",
-        "seld/jsonlint": "^1.7",
-        "doctrine/lexer": "^1.0"
+        "doctrine/lexer": "^1.0",
+        "nette/php-generator": "^3.2"
     },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "autoload": {
         "psr-4": {
             "AnalyticsConverter\\": "src/"
@@ -23,5 +25,8 @@
     },
     "bin": [
         "bin/analytics-convert"
-    ]
+    ],
+    "require-dev": {
+        "graviton/analytics-base": "=dev-master"
+    }
 }
