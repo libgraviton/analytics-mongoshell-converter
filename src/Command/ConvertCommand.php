@@ -69,7 +69,6 @@ class ConvertCommand extends Command
 		$finder
 			->files()
 			->in($input->getArgument('scanDir'))
-			->path('/\/analytics\//i')
 			->name('*.js')
 			->notName('_*')
 			->sortByName();

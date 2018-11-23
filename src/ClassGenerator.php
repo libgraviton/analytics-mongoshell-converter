@@ -47,7 +47,7 @@ class ClassGenerator {
 		$class = $namespace->addClass($this->name);
 		$class
 			->setFinal()
-			->setExtends('\AnalyticsConverter\Pipeline')
+			->setExtends('\Graviton\AnalyticsBase\Pipeline\PipelineAbstract')
 			->addComment("Generated Graviton Pipeline class");
 
 		$class->addMethod('getPipeline')
