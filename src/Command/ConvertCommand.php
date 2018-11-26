@@ -11,6 +11,9 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\Process\PhpExecutableFinder;
+use Symfony\Component\Process\PhpProcess;
+use Symfony\Component\Process\Process;
 
 /**
  * @author   List of contributors <https://github.com/libgraviton/compose-transpiler/graphs/contributors>
@@ -64,6 +67,10 @@ class ConvertCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        // find php
+        $phpFinder = new PhpExecutableFinder();
+        $phpProcess = $phpFinder->find();
+
 		$fs = new Filesystem();
 		$finder = new Finder();
 		$finder
@@ -93,7 +100,20 @@ class ConvertCommand extends Command
 			$targetFileName = $input->getArgument('outDir').'/'.$classGenerator->getName().'.php';
 
 			$fs->dumpFile($targetFileName, $classGenerator->generate());
-			echo "wrote ".$targetFileName.PHP_EOL;
+			$output->writeln("wrote php file '".$targetFileName."'");
+
+			// php lint the file..
+            $proc = new Process([$phpProcess, '-l', $targetFileName]);
+            $proc->start();
+            $proc->wait();
+
+            if ($proc->getExitCode() !== 0) {
+                throw new \LogicException(
+                    "Invalid PHP code generated in file '".$targetFileName."' - check your pipeline!"
+                );
+            } else {
+                $output->writeln("Checked PHP syntax - all OK!");
+            }
 		}
     }
 }
