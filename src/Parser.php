@@ -20,6 +20,7 @@ class Parser
     private $conditionals = [];
     private $conditionalParamMap = [];
     private $currentConditional;
+    private $conditionalCounter = 1;
 
     public function __construct($input)
     {
@@ -82,7 +83,8 @@ class Parser
                     }
                     break;
 				case Lexer::T_COMMENT_IFPARAMSTART:
-					$conditionalId = uniqid();
+					$conditionalId = str_pad((string) $this->conditionalCounter, 5, '0', STR_PAD_LEFT);
+					$this->conditionalCounter++;
 					$this->addContent('$this->getConditional'.$conditionalId.'(),');
 					$this->openConditional($conditionalId, $this->lexer->lookahead['value']);
 					break;

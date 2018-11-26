@@ -66,7 +66,7 @@ class ClassGenerator {
 	}
 
 	private function generateName($name) {
-		$name = str_replace(".js", "", $name);
+		$name = str_replace([".js", "-", "_"], "", $name);
 		$name = str_replace(".", " ", $name);
 		$name = ucwords($name);
 		$name = str_replace(" ", "", $name);
