@@ -15,7 +15,8 @@
         "symfony/filesystem": "^4.1",
         "doctrine/lexer": "^1.0",
         "nette/php-generator": "^3.2",
-        "symfony/console": "^4.1"
+        "symfony/console": "^4.1",
+        "symfony/process": "^4.1"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
@@ -28,6 +29,6 @@
         "bin/analytics-convert"
     ],
     "require-dev": {
-        "graviton/analytics-base": "=dev-master"
+        "graviton/analytics-base": "*"
     }
 }
