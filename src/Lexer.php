@@ -27,6 +27,7 @@ class Lexer extends AbstractLexer
     public const T_BOOLEAN_FALSE = 9;
     public const T_BOOLEAN_TRUE = 10;
     public const T_DASH = 11;
+    public const T_NULL = 12;
 
     public const T_OPEN_CURLY_BRACE = 18;
     public const T_CLOSE_CURLY_BRACE = 19;
@@ -81,7 +82,8 @@ class Lexer extends AbstractLexer
                 '(?:[0-9]+(?:[\.][0-9]+)*)(?:e[+-]?[0-9]+)?', // numbers
                 "\"(?:[^\"]|'')*\"", // quoted strings
                 'true',
-                'false'
+                'false',
+                'null'
             ],
             array_keys($this->commentRegexes)
         );
@@ -132,6 +134,8 @@ class Lexer extends AbstractLexer
                 return self::T_BOOLEAN_TRUE;
             case ($value === 'false'):
                 return self::T_BOOLEAN_FALSE;
+            case ($value === 'null'):
+                return self::T_NULL;
             default:
                 foreach ($this->commentRegexes as $regex => $regexType) {
                     if (preg_match('/' . $regex . '/i', $value)) {

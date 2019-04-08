@@ -112,6 +112,9 @@ class Parser
                 case Lexer::T_BOOLEAN_FALSE:
                     $thisLine = 'false';
                     break;
+                case Lexer::T_NULL:
+                    $thisLine = 'null';
+                    break;
                 case Lexer::T_COMMA:
                 case Lexer::T_NUMBER:
                 case Lexer::T_DASH:
